@@ -73,8 +73,6 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  const Divider(height: 1),
-
                   // ── Middle: active cards ─────────────────────────────────────
 
                   // Preflight queue
@@ -223,7 +221,7 @@ class DashboardScreen extends ConsumerWidget {
                     session.preflightQueue.isEmpty &&
                     session.decisionQueue.isEmpty) ...[
                   TaskInput(
-                    enabled: conn.daemonConnected,
+                    enabled: true,
                     onSubmit: (task) => actions.submitTask(task),
                   ),
                   const SizedBox(height: 24),

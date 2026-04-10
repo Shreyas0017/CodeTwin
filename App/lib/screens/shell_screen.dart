@@ -81,45 +81,77 @@ class ShellScreen extends ConsumerWidget {
           children: [
             Positioned.fill(child: shell),
             const Positioned(
-              bottom: 30,
+              bottom: 16,
               right: 16,
               child: DaemonStatusBar(),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (index) {
-          shell.goBranch(
-            index,
-            initialLocation: index == shell.currentIndex,
-          );
-        },
-        destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible: badgeCount > 0,
-              label: Text('$badgeCount'),
-              child: const Icon(Icons.list_alt),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: const Color(0xFF08080A), // Deep dark matching background
+          indicatorColor: Colors.tealAccent.withValues(alpha: 0.15),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF20B2AA),
+                letterSpacing: 0.5,
+              );
+            }
+            return TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withValues(alpha: 0.4),
+              letterSpacing: 0.5,
+            );
+          }),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: Color(0xFF20B2AA), size: 26);
+            }
+            return IconThemeData(
+                color: Colors.white.withValues(alpha: 0.4), size: 24);
+          }),
+        ),
+        child: NavigationBar(
+          selectedIndex: shell.currentIndex,
+          elevation: 0,
+          onDestinationSelected: (index) {
+            shell.goBranch(
+              index,
+              initialLocation: index == shell.currentIndex,
+            );
+          },
+          destinations: [
+            const NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard),
+              label: 'Dashboard',
             ),
-            label: 'Logs',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+            NavigationDestination(
+              icon: Badge(
+                isLabelVisible: badgeCount > 0,
+                label: Text('$badgeCount'),
+                backgroundColor: const Color(0xFF20B2AA),
+                child: const Icon(Icons.list_alt),
+              ),
+              label: 'Logs',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.history_outlined),
+              selectedIcon: Icon(Icons.history),
+              label: 'History',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+        ),
       ),
     );
   }

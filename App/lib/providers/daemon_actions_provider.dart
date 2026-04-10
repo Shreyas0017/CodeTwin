@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/agent_message.dart';
+import '../models/log_entry.dart';
+import '../models/session_status.dart';
 import '../providers/connection_provider.dart';
 import '../providers/session_provider.dart';
 import '../services/socket_service.dart';
@@ -13,8 +15,9 @@ class DaemonActions {
   final DaemonConnectionState connection;
   final SessionState session;
   final SocketService socketService;
+  final Ref ref;
 
-  DaemonActions(this.connection, this.session, this.socketService);
+  DaemonActions(this.connection, this.session, this.socketService, this.ref);
 
   bool get isDaemonConnected => connection.daemonConnected;
 
@@ -38,10 +41,21 @@ class DaemonActions {
 
   // ── public API ───────────────────────────────────────────────────────────
 
-  void submitTask(String task) => _send(MessageType.taskSubmit, {
-        'task': task,
-        'dependenceLevel': session.dependenceLevel,
-      });
+  void submitTask(String task) {
+    if (!isDaemonConnected) {
+      ref.read(sessionProvider.notifier).appendLog(LogEntry(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            timestamp: DateTime.now().toIso8601String(),
+            level: AgentLogLevel.error,
+            message: 'Failed to send task: Agent disconnected. Please connect the CLI daemon first.',
+          ));
+      return;
+    }
+    _send(MessageType.taskSubmit, {
+      'task': task,
+      'dependenceLevel': session.dependenceLevel,
+    });
+  }
 
   void cancelTask() => _send(MessageType.taskCancel, {});
 
@@ -75,5 +89,5 @@ final daemonActionsProvider = Provider<DaemonActions>((ref) {
       ref.watch(connectionProvider).valueOrNull ?? DaemonConnectionState.empty;
   final session =
       ref.watch(sessionProvider).valueOrNull ?? SessionState.empty;
-  return DaemonActions(connection, session, SocketService());
+  return DaemonActions(connection, session, SocketService(), ref);
 });
