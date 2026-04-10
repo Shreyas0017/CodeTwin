@@ -1,4 +1,4 @@
-name: codetwin_app
+name: CodeTwin
 description: "CodeTwin mobile app — remote control for the CodeTwin CLI agent."
 publish_to: 'none'
 version: 1.0.0+1

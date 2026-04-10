@@ -13,6 +13,7 @@ import '../widgets/decision_card.dart';
 import '../widgets/task_input.dart';
 import '../widgets/level_picker.dart';
 import '../widgets/agent_log_list.dart';
+import '../widgets/chat_message_list.dart';
 import '../utils/formatters.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -174,30 +175,26 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ],
 
-                  // Running (no pending): show last 5 logs
-                  if (session.status == SessionStatus.running &&
+                  // Show Chat instead of raw logs
+                  if (session.logs.isNotEmpty &&
                       session.preflightQueue.isEmpty &&
                       session.decisionQueue.isEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
                         children: [
-                          Text('Live Logs', style: theme.textTheme.titleSmall),
+                          Text('Task Progress', style: theme.textTheme.titleSmall),
                           const Spacer(),
                           TextButton(
                             onPressed: () => context.go('/logs'),
-                            child: const Text('View all →'),
+                            child: const Text('View Raw Logs →'),
                           ),
                         ],
                       ),
                     ),
                     SizedBox(
-                      height: 200,
-                      child: AgentLogList(
-                        logs: session.logs.length > 5
-                            ? session.logs.sublist(session.logs.length - 5)
-                            : session.logs,
-                      ),
+                      height: 300,
+                      child: ChatMessageList(logs: session.logs),
                     ),
                   ],
                 ],
