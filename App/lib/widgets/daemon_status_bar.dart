@@ -92,10 +92,10 @@ class _DaemonStatusBarState extends ConsumerState<DaemonStatusBar>
               width: 1.5,
             ),
           ),
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: RotationTransition(
             turns: isConnecting ? _spinController : const AlwaysStoppedAnimation(0),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 18),
           ),
         ),
       ),

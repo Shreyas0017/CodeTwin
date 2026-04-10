@@ -81,7 +81,7 @@ class ShellScreen extends ConsumerWidget {
           children: [
             Positioned.fill(child: shell),
             const Positioned(
-              bottom: 16,
+              bottom: 30,
               right: 16,
               child: DaemonStatusBar(),
             ),
