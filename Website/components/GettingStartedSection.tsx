@@ -1,7 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useVelocity, useSpring, useTransform } from 'framer-motion'
 import { Download, Settings, Play, Check } from 'lucide-react'
 import InstallStrip from './InstallStrip'
 
@@ -29,7 +28,7 @@ const steps = [
   },
 ]
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 
 interface GitHubContributor {
   id: number
@@ -44,8 +43,15 @@ const easeOut = [0.16, 1, 0.3, 1] as const
 export default function GettingStartedSection() {
   const [contributors, setContributors] = useState<GitHubContributor[]>([])
 
+  const { scrollY } = useScroll();
+  const baseX = useTransform(scrollY, [0, 5000], [100, -1500]);
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
+  const skewVelocity = useTransform(smoothVelocity, [-1000, 1000], [-8, 8]);
+  const skewX = useTransform(skewVelocity, (v) => `${v}deg`);
+
   useEffect(() => {
-    fetch('https://api.github.com/repos/Sahnik0/CodeTwin/contributors?per_page=5')
+    fetch(`https://api.github.com/repos/Sahnik0/CodeTwin/contributors?per_page=5&t=${new Date().getTime()}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setContributors(data)
@@ -53,8 +59,18 @@ export default function GettingStartedSection() {
       .catch((err) => console.error('Failed to fetch contributors:', err))
   }, [])
   return (
-    <section className="py-28 px-6 border-t border-border-default">
-      <div className="max-w-6xl mx-auto">
+    <section className="relative py-28 px-6 border-t border-border-default overflow-hidden">
+      {/* Massive Background Marquee */}
+      <motion.div 
+        style={{ x: baseX, skewX }}
+        className="absolute top-1/2 -translate-y-1/2 flex whitespace-nowrap pointer-events-none opacity-5 mix-blend-plus-lighter z-0"
+      >
+        <span className="text-[180px] md:text-[240px] font-black tracking-tighter uppercase text-[#a6a6ed]">
+          Terminal First · Local First · Zero Telemetry · Terminal First · Local First · Zero Telemetry ·
+        </span>
+      </motion.div>
+
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}

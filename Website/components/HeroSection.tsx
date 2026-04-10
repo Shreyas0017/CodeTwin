@@ -2,15 +2,21 @@
 
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { Suspense } from 'react'
 import InstallStrip from './InstallStrip'
 import CircuitPattern from './CircuitPattern'
+import BorderGlow from './BorderGlow'
 import GitHubStarBadge from './GitHubStarBadge'
 
 const easeOut = [0.16, 1, 0.3, 1] as const
 
 export default function HeroSection() {
+  const { scrollY } = useScroll()
+  const rotateX = useTransform(scrollY, [0, 800], [0, 12])
+  const scale = useTransform(scrollY, [0, 800], [1, 0.92])
+  const opacity = useTransform(scrollY, [0, 800], [1, 0.5])
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-start pt-36 pb-16 px-6 overflow-hidden">
       {/* Layered radial glow */}
@@ -88,7 +94,7 @@ export default function HeroSection() {
         >
           <Link
             href="/docs/getting-started"
-            className="flex items-center justify-center gap-2 px-8 h-12 rounded-lg border border-[#a6a6ed] text-[#a6a6ed] text-sm font-medium hover:bg-[#a6a6ed14] transition-all duration-200 shadow-[0_0_20px_rgba(166,166,237,0.08)]"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-8 h-12 rounded-lg border border-[#a6a6ed] text-[#a6a6ed] text-sm font-medium hover:bg-[#a6a6ed14] transition-all duration-200 shadow-[0_0_20px_rgba(166,166,237,0.08)]"
           >
             Get Started →
           </Link>
@@ -119,28 +125,33 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.78, duration: 0.7, ease: easeOut }}
         >
-          <div
-            className="relative rounded-xl border border-border-default bg-surface-elevated overflow-hidden shadow-2xl aspect-[16/9]"
-            style={{
-              boxShadow:
-                '0 0 0 1px rgba(255,255,255,0.04) inset, 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(166, 166, 237, 0.04)',
-            }}
-          >
-            {/* Placeholder inner content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <div className="w-8 h-8 rounded border border-border-default flex items-center justify-center opacity-30">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <rect x="1" y="1" width="12" height="12" rx="1.5" stroke="#888" strokeWidth="1.2" />
-                  <path d="M4 7h6M7 4v6" stroke="#888" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
+          <motion.div style={{ rotateX, scale, opacity, transformPerspective: 1200 }}>
+            <BorderGlow
+              edgeSensitivity={40}
+              glowColor="240 60 70"
+              backgroundColor="#0a0a0a"
+              borderRadius={16}
+              glowRadius={40}
+              glowIntensity={1}
+              coneSpread={25}
+              animated={true}
+              colors={['#a6a6ed', '#ffffff', '#2dd4bf']}
+              className="w-full aspect-[16/9]"
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <div className="w-8 h-8 rounded border border-border-default flex items-center justify-center opacity-30">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <rect x="1" y="1" width="12" height="12" rx="1.5" stroke="#888" strokeWidth="1.2" />
+                    <path d="M4 7h6M7 4v6" stroke="#888" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <span className="text-text-muted text-[11px] font-mono opacity-30 tracking-widest uppercase">
+                  Screenshot Coming Soon
+                </span>
               </div>
-              <span className="text-text-muted text-[11px] font-mono opacity-30 tracking-widest uppercase">
-                Screenshot Coming Soon
-              </span>
-            </div>
-            {/* Edge fade at bottom */}
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background/60 to-transparent" />
-          </div>
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background/60 to-transparent" />
+            </BorderGlow>
+          </motion.div>
         </motion.div>
       </div>
 
