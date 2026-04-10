@@ -231,6 +231,7 @@ class DashboardScreen extends ConsumerWidget {
 
                 LevelPicker(
                   currentLevel: session.dependenceLevel,
+                  showDetails: false,
                   onChanged: (level) {
                     ref.read(sessionProvider.notifier).setLevel(level);
                     actions.changeLevel(level);

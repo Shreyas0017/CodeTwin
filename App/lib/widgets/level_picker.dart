@@ -4,11 +4,13 @@ import '../constants/levels.dart';
 class LevelPicker extends StatelessWidget {
   final int currentLevel;
   final ValueChanged<int> onChanged;
+  final bool showDetails;
 
   const LevelPicker({
     super.key,
     required this.currentLevel,
     required this.onChanged,
+    this.showDetails = true,
   });
 
   @override
@@ -85,49 +87,51 @@ class LevelPicker extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Fix text overlap using custom layoutbuilder and fast transition
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 150),
-            reverseDuration: const Duration(milliseconds: 100),
-            layoutBuilder: (currentChild, previousChildren) {
-              // This guarantees only one renders in stack or centers properly
-              return Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  ...previousChildren,
-                  if (currentChild != null) currentChild,
+          if (showDetails) ...[
+            const SizedBox(height: 16),
+            // Fix text overlap using custom layoutbuilder and fast transition
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              reverseDuration: const Duration(milliseconds: 100),
+              layoutBuilder: (currentChild, previousChildren) {
+                // This guarantees only one renders in stack or centers properly
+                return Stack(
+                  alignment: Alignment.topCenter,
+                  children: <Widget>[
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                );
+              },
+              transitionBuilder: (child, animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: Column(
+                key: ValueKey<int>(currentLevel),
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    info.name.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2.0,
+                      color: bgColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    info.description,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                      height: 1.4,
+                    ),
+                  ),
                 ],
-              );
-            },
-            transitionBuilder: (child, animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: Column(
-              key: ValueKey<int>(currentLevel),
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  info.name.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2.0,
-                    color: bgColor,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  info.description,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                    height: 1.4,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

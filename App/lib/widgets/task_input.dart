@@ -1,4 +1,4 @@
-/// Multi-line task text input with submit button.
+/// Modern multi-line task text input mimicking an AI chat bar.
 
 import 'package:flutter/material.dart';
 
@@ -14,6 +14,7 @@ class TaskInput extends StatefulWidget {
 
 class _TaskInputState extends State<TaskInput> {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
   bool _hasText = false;
 
   @override
@@ -23,11 +24,15 @@ class _TaskInputState extends State<TaskInput> {
       final has = _controller.text.trim().isNotEmpty;
       if (has != _hasText) setState(() => _hasText = has);
     });
+    _focusNode.addListener(() {
+      setState(() {}); // Trigger rebuild for focus styling
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -36,49 +41,91 @@ class _TaskInputState extends State<TaskInput> {
     if (text.isEmpty) return;
     widget.onSubmit(text);
     _controller.clear();
+    _focusNode.unfocus();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    const primaryColor = Color(0xFF20B2AA);
+    final isFocused = _focusNode.hasFocus;
 
-    return Card(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutCubic,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Submit a Task',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: const Color(0xFF16161A), // Deep sleek background
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isFocused
+              ? primaryColor.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.08),
+          width: 1.5,
+        ),
+        boxShadow: [
+          if (isFocused)
+            BoxShadow(
+              color: primaryColor.withValues(alpha: 0.15),
+              blurRadius: 16,
+              spreadRadius: 2,
             ),
-            const SizedBox(height: 12),
-            TextField(
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: TextField(
               controller: _controller,
+              focusNode: _focusNode,
               enabled: widget.enabled,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                height: 1.4,
+              ),
               decoration: InputDecoration(
-                hintText: 'Describe what you want the agent to do…',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                hintText: 'Ask CodeTwin to do something...',
+                hintStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  fontSize: 15,
                 ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.fromLTRB(20, 16, 8, 16),
                 isDense: true,
               ),
               maxLines: 4,
-              minLines: 2,
-              textInputAction: TextInputAction.newline,
+              minLines: 1,
+              textInputAction: TextInputAction.none, // Allow multiline typing
             ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: widget.enabled && _hasText ? _submit : null,
-              icon: const Icon(Icons.send, size: 18),
-              label: const Text('Submit Task'),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8, bottom: 8),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: _hasText ? 1.0 : 0.0),
+              duration: const Duration(milliseconds: 200),
+              builder: (context, val, child) {
+                return Opacity(
+                  opacity: val,
+                  child: Transform.scale(
+                    scale: 0.8 + (0.2 * val),
+                    child: IconButton(
+                      onPressed: widget.enabled && _hasText ? _submit : null,
+                      style: IconButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                      icon: const Icon(Icons.arrow_upward, size: 20),
+                    ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
